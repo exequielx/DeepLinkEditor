@@ -5,12 +5,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
   const [link, setLink] = React.useState('');
+  const [prelink, setPrelink] = React.useState('');
 
   const read = async () => {
     try {
       let value = await AsyncStorage.getItem('@deeplink')
       if (value) {
         value = decodeURIComponent(value);
+        setPrelink(value);
         setLink(value);
       }
     } catch (e) { }
@@ -21,10 +23,11 @@ export default function App() {
   const changeLink = async (val) => {
     try {
       val = val.replace(/(\r\n|\n|\r)/gm, "");
-      val = val.replace(' ', '');
+      val = val.replace(/ /g, '');
       await AsyncStorage.setItem('@deeplink', encodeURIComponent(val));
     } catch (e) { }
     setLink(val);
+    setPrelink(val);
   };
 
   const onLinkPress = async () => {
@@ -61,13 +64,14 @@ export default function App() {
           style={styles.input}
           placeholder='...'
           multiline={true}
-          numberOfLines={10}
-          onChangeText={(r) => changeLink(r)}
-          value={link} />
+          numberOfLines={8}
+          onChangeText={(r) => setPrelink(r)}
+          value={prelink} />
         <View style={styles.buttons}>
           <Text style={[styles.button, getScopeStyle('beta')]} onPress={() => { onButtonPress('beta') }}>Beta</Text>
           <Text style={[styles.button, getScopeStyle('omega')]} onPress={() => { onButtonPress('omega') }}>Omega</Text>
           <Text style={[styles.button, getScopeStyle('www')]} onPress={() => { onButtonPress('www') }}>Prod</Text>
+          <Text style={[styles.button, { color: '#49eb34', borderColor: '#49eb34', marginLeft: 'auto' }]} onPress={() => { changeLink(prelink) }}>Generate</Text>
         </View>
         <Text style={styles.link} onPress={onLinkPress}>{link}</Text>
       </View>
@@ -93,7 +97,7 @@ const styles = StyleSheet.create({
     width: '100%',
     color: 'white',
     padding: 6,
-    fontSize: 18,
+    fontSize: 16,
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 8,
@@ -101,7 +105,7 @@ const styles = StyleSheet.create({
   link: {
     paddingTop: 40,
     color: '#51D1F6',
-    fontSize: 18,
+    fontSize: 16,
     textDecorationLine: 'underline',
   },
   buttons: {
@@ -111,10 +115,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   button: {
+    color: 'white',
     borderColor: 'white',
     padding: 6,
     borderWidth: 1,
     borderRadius: 20,
-    color: 'white',
   }
 });
